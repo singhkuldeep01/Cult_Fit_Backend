@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                  // ✅ Modern JS output (support for async/await etc.)
+    "module": "commonjs",             // ✅ Required for Node.js/Express (uses CommonJS)
+    "rootDir": "./src",               // ✅ Your TypeScript source files live here
+    "outDir": "./dist",               // ✅ Compiled JS files go here
+
+    "strict": true,                   // ✅ Enables all strict type checks (recommended)
+
+    "esModuleInterop": true,         // ✅ Allows import express from 'express'
+    "forceConsistentCasingInFileNames": true,  // ✅ Prevents import bugs on case-sensitive OS
+
+    "skipLibCheck": true             // ✅ Speeds up compile by skipping .d.ts file checks
+  }
+}
