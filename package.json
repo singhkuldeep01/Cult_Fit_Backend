@@ -1,16 +1,17 @@
 {
   "name": "generictypescriptserver",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "express": "^5.1.0"
   },
