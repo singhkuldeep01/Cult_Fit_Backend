@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express';
-import {loadEnv , serverConfig} from './config';
+import { serverConfig} from './config';
 
 
 const app = express();
-loadEnv(); // Load environment variables
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello, TypeScript + Express!');

@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 
-export function loadEnv(){
+function loadEnv(){
     dotenv.config(); // Load environment variables from .env file
 }
+
+loadEnv(); // Call the function to load environment variables
 
 type ServerConfig = {
     port: number;
