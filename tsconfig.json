@@ -7,7 +7,7 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true,  //Exclude type checking of declaration files like .d.ts files
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
