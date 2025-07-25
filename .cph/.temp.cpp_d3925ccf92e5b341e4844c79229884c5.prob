@@ -1,0 +1,1 @@
+{"name":"Local: temp","url":"d:\\Developers\\Typescript\\genericTypeScriptServer\\temp.cpp","tests":[{"id":1753384352282,"input":"5 5\n1 1 -1 2 3  ","output":"4"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Developers\\Typescript\\genericTypeScriptServer\\temp.cpp","group":"local","local":true}
