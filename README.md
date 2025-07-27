@@ -11,8 +11,9 @@ A comprehensive TypeScript Express.js server template with detailed documentatio
 ### Core Concepts
 - [🚨 Error Handling](./docs/error-handling.md) - Comprehensive error handling strategies
 - [⚡ Middleware](./docs/middleware.md) - Custom middleware patterns and usage
+- [📊 Logging](./docs/logging.md) - Winston logging with request tracking
+- [🔄 Async Context](./docs/async-context.md) - AsyncLocalStorage for request lifecycle management
 - [🔒 Security](./docs/security.md) - Security best practices and implementation
-- [📊 Logging](./docs/logging.md) - Logging strategies and configuration
 
 ### Advanced Topics
 - [🗄️ Database Integration](./docs/database.md) - Database setup and ORM integration
@@ -51,7 +52,6 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of cond
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE.md) file for details.
-  // Express catches this and passes to error handler
 });
 ```
 
