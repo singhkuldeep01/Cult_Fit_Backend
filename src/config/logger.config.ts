@@ -1,5 +1,6 @@
 import winston from "winston";
 import { getRequestId } from "../utils/asyncContext.util";
+import 'winston-daily-rotate-file';
 
 const logger = winston.createLogger({
     format: winston.format.combine(
@@ -28,15 +29,13 @@ const logger = winston.createLogger({
             //     winston.format.simple()
             // )
         }),
-        new winston.transports.File({ 
-            filename: 'logs/error.json', 
-            level: 'error',
-            format: winston.format.json()
+        new winston.transports.DailyRotateFile({
+            filename: 'logs/app-%DATE%.log', // Log file name with date
+            datePattern: 'YYYY-MM-DD-HH', // Date pattern for log files
+            zippedArchive: true, // Enable gzip compression for log files
+            maxSize: '20m', // Maximum size of a log file
+            maxFiles: '14d' // file will be kept for 14 days
         }),
-        new winston.transports.File({ 
-            filename: 'logs/combined.json',
-            format: winston.format.json()
-        })
     ]
 });
 

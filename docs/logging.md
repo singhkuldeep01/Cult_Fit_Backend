@@ -165,170 +165,165 @@ new winston.transports.File({
 })
 ```
 
-### 3. **Rotating File Transport**
+### 3. **Daily Rotating File Transport (Recommended for Production)**
 ```typescript
 import 'winston-daily-rotate-file';
 
 new winston.transports.DailyRotateFile({
-    filename: 'logs/application-%DATE%.log',
-    datePattern: 'YYYY-MM-DD',
-    maxSize: '20m',
-    maxFiles: '14d'
+    filename: 'logs/app-%DATE%.log',
+    datePattern: 'YYYY-MM-DD-HH', // Creates new file every hour
+    zippedArchive: true, // Compress old files
+    maxSize: '20m', // Max file size before rotation
+    maxFiles: '14d' // Keep files for 14 days, then delete
 })
 ```
 
-### 4. **Multiple Transports Example**
+#### **DailyRotateFile Configuration Options**
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `filename` | File path with %DATE% placeholder | `'logs/app-%DATE%.log'` |
+| `datePattern` | Date format for file rotation | `'YYYY-MM-DD'` (daily), `'YYYY-MM-DD-HH'` (hourly) |
+| `zippedArchive` | Compress old files to save space | `true` |
+| `maxSize` | Max file size before creating new file | `'20m'`, `'100k'`, `'1g'` |
+| `maxFiles` | Retention period | `'14d'` (14 days), `'10'` (10 files) |
+| `auditFile` | Metadata file to track rotations | `'logs/audit.json'` |
+
+#### **File Rotation Examples**
+
+**Daily Rotation:**
 ```typescript
-transports: [
-    // Console for development
-    new winston.transports.Console({
-        format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-        )
-    }),
-    
-    // Error file
-    new winston.transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        format: winston.format.json()
-    }),
-    
-    // Combined file
-    new winston.transports.File({
-        filename: 'logs/combined.log',
-        format: winston.format.json()
-    }),
-    
-    // Daily rotate file
-    new winston.transports.DailyRotateFile({
-        filename: 'logs/app-%DATE%.log',
-        datePattern: 'YYYY-MM-DD-HH',
-        maxSize: '20m'
-    })
-]
+new winston.transports.DailyRotateFile({
+    filename: 'logs/application-%DATE%.log',
+    datePattern: 'YYYY-MM-DD', // New file each day
+    maxFiles: '30d' // Keep 30 days of logs
+})
+// Creates: application-2024-01-15.log, application-2024-01-16.log, etc.
 ```
 
-## 📝 Logger Usage Examples
-
-### 1. **Basic Logging**
+**Hourly Rotation:**
 ```typescript
-import logger from '../config/logger.config';
-
-// Different log levels
-logger.error('Something went wrong');
-logger.warn('This is a warning');
-logger.info('Information message');
-logger.debug('Debug information');
-logger.verbose('Verbose output');
+new winston.transports.DailyRotateFile({
+    filename: 'logs/app-%DATE%.log',
+    datePattern: 'YYYY-MM-DD-HH', // New file each hour
+    maxFiles: '7d' // Keep 7 days of logs
+})
+// Creates: app-2024-01-15-14.log, app-2024-01-15-15.log, etc.
 ```
 
-### 2. **Logging with Metadata**
+**Size-based Rotation:**
 ```typescript
-logger.info('User login', {
-    userId: '12345',
-    email: 'user@example.com',
-    ip: '192.168.1.1'
+new winston.transports.DailyRotateFile({
+    filename: 'logs/app-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    maxSize: '10m', // Rotate when file reaches 10MB
+    maxFiles: '20' // Keep maximum 20 files
+})
+```
+
+#### **Automatic File Cleanup**
+
+The plugin automatically:
+- **Creates new files** based on date pattern
+- **Compresses old files** (if `zippedArchive: true`)
+- **Deletes expired files** based on `maxFiles` setting
+- **Tracks rotations** in audit file
+
+```typescript
+// Complete production configuration
+new winston.transports.DailyRotateFile({
+    filename: 'logs/app-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true, // Old files become .gz
+    maxSize: '20m',
+    maxFiles: '30d', // Auto-delete files older than 30 days
+    auditFile: 'logs/audit.json', // Track rotation metadata
+    level: 'info'
+})
+```
+
+#### **File Structure Example**
+```
+logs/
+├── app-2024-01-15.log.gz    # Compressed old file
+├── app-2024-01-16.log.gz    # Compressed old file
+├── app-2024-01-17.log       # Current active file
+├── audit.json               # Rotation metadata
+└── error-2024-01-17.log     # Separate error log
+```
+
+### 4. **Complete Production Setup with Daily Rotation**
+```typescript
+// src/config/logger.config.ts
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+import { getRequestId } from '../utils/asyncContext.util';
+
+const logger = winston.createLogger({
+    level: process.env.LOG_LEVEL || 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf((info) => {
+            const requestId = getRequestId();
+            return JSON.stringify({
+                requestId: requestId || 'N/A',
+                timestamp: info.timestamp,
+                level: info.level,
+                message: info.message,
+                ...info
+            }, null, 2);
+        })
+    ),
+    transports: [
+        // Console for development
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.simple()
+            )
+        }),
+        
+        // Combined logs with daily rotation
+        new winston.transports.DailyRotateFile({
+            filename: 'logs/app-%DATE%.log',
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: true,
+            maxSize: '20m',
+            maxFiles: '30d', // Keep 30 days
+            level: 'info'
+        }),
+        
+        // Error logs with daily rotation
+        new winston.transports.DailyRotateFile({
+            filename: 'logs/error-%DATE%.log',
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: true,
+            maxSize: '10m',
+            maxFiles: '30d', // Keep 30 days
+            level: 'error'
+        }),
+        
+        // Debug logs (shorter retention)
+        new winston.transports.DailyRotateFile({
+            filename: 'logs/debug-%DATE%.log',
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: true,
+            maxSize: '50m',
+            maxFiles: '7d', // Keep only 7 days for debug logs
+            level: 'debug'
+        })
+    ]
 });
 
-logger.error('Database connection failed', {
-    error: err.message,
-    stack: err.stack,
-    database: 'users_db'
-});
+export default logger;
 ```
 
-### 3. **AsyncLocalStorage Integration**
-```typescript
-// In controller
-import { getRequestId } from '../middleware/attachUniqueID.middleware';
-
-export const userController = (req, res, next) => {
-    // Request ID automatically included via logger format
-    logger.info('Processing user request');
-    
-    // Or manually include
-    logger.info('User data retrieved', { 
-        requestId: getRequestId(),
-        userId: req.params.id 
-    });
-};
-```
-
-### 4. **Error Logging in Middleware**
-```typescript
-export const errorHandler = (err, req, res, next) => {
-    logger.error('Request failed', {
-        requestId: getRequestId(),
-        error: err.message,
-        statusCode: err.statusCode || 500,
-        stack: err.stack,
-        url: req.url,
-        method: req.method
-    });
-};
-```
-
-## 📋 Log Output Examples with Request Tracking
-
-### Console Output with AsyncLocalStorage
-```
-{
-  "requestId": "550e8400-e29b-41d4-a716-446655440000",
-  "timestamp": "15-01-2024 14:30:25",
-  "level": "info",
-  "message": "User login attempt"
-}
-{
-  "requestId": "550e8400-e29b-41d4-a716-446655440000",
-  "timestamp": "15-01-2024 14:30:26",
-  "level": "info",
-  "message": "Database query executed",
-  "query": "SELECT * FROM users WHERE id = ?"
-}
-{
-  "requestId": "550e8400-e29b-41d4-a716-446655440000",
-  "timestamp": "15-01-2024 14:30:27",
-  "level": "info",
-  "message": "User authenticated successfully"
-}
-```
-
-### Complete Request Flow Logging
-```json
-{
-  "requestId": "abc-123-def-456",
-  "timestamp": "15-01-2024 14:30:25",
-  "level": "info",
-  "message": "Request started",
-  "method": "GET",
-  "url": "/api/users/123"
-}
-{
-  "requestId": "abc-123-def-456",
-  "timestamp": "15-01-2024 14:30:25",
-  "level": "info", 
-  "message": "Authentication successful",
-  "userId": "user-789"
-}
-{
-  "requestId": "abc-123-def-456",
-  "timestamp": "15-01-2024 14:30:26",
-  "level": "info",
-  "message": "Database query executed",
-  "table": "users",
-  "duration": "45ms"
-}
-{
-  "requestId": "abc-123-def-456",
-  "timestamp": "15-01-2024 14:30:27",
-  "level": "info",
-  "message": "Request completed",
-  "statusCode": 200,
-  "totalDuration": "156ms"
-}
-```
+#### **Benefits of Daily Rotation**
+- ✅ **Automatic cleanup** - Old files deleted automatically
+- ✅ **Space efficiency** - Files compressed with gzip
+- ✅ **Manageable file sizes** - Prevents huge log files
+- ✅ **Easy searching** - Find logs by date
+- ✅ **Production ready** - Handles long-running applications
 
 ## 🎯 Best Practices
 
@@ -403,6 +398,11 @@ const logger = winston.createLogger({
 
 ## 🔗 Related Documentation
 
+- [🔄 AsyncLocalStorage Context](./async-context.md) - **Core dependency** for request tracking
+- [🚨 Error Handling](./error-handling.md) - Error logging with request context
+- [⚡ Middleware Patterns](./middleware.md) - Middleware implementation patterns
+
+[← Back to Main README](../README.md)
 - [🔄 AsyncLocalStorage Context](./async-context.md) - **Core dependency** for request tracking
 - [🚨 Error Handling](./error-handling.md) - Error logging with request context
 - [⚡ Middleware Patterns](./middleware.md) - Middleware implementation patterns
