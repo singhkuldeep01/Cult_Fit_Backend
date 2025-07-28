@@ -286,9 +286,5 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
 ## 🔗 Related Documentation
 
-- [Middleware Patterns](./middleware.md)
 - [Logging Configuration](./logging.md)
-- [Security Best Practices](./security.md)
-- [Testing Error Scenarios](./testing.md)
-
 [← Back to Main README](../README.md)
