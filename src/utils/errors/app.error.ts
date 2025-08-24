@@ -21,6 +21,8 @@ export class InternalServerError extends AppError {
   }
 }
 
+
+
 export class NotFoundError extends AppError {
   constructor(message: string = "Resource Not Found") {
     super(message, 404, 'NotFoundError');

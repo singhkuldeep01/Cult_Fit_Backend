@@ -4,13 +4,14 @@ import pingRouter from './router/ping.router';
 import { errorHandler } from './middleware/error.middleware';
 import logger from './config/logger.config';
 import { attachUniqueID } from './middleware/attachUniqueID.middleware';
+import apiRoutes from './router/index';
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 
 app.use(attachUniqueID);
-
+app.use('/api' , apiRoutes)
 app.use(pingRouter); // Use the ping router
 
 app.get('/', (req: Request, res: Response) => {

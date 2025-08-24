@@ -27,7 +27,7 @@ model users {
     // relation field
   roles     users_roles[]
   manager   gym_center[]
-   credentials  credentials[]
+  credentials  credentials[]
 }
 
 model roles {
@@ -45,8 +45,8 @@ model users_roles {
   role_id   Int
 
   // Relations
-  user      users @relation(fields: [user_id], references: [user_id])
-  role      roles @relation(fields: [role_id], references: [role_id])
+  user      users @relation(fields: [user_id], references: [user_id] , onDelete: Cascade , onUpdate: Cascade)
+  role      roles @relation(fields: [role_id], references: [role_id] , onDelete: Cascade , onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -67,7 +67,7 @@ model gym_center{
   updatedAt   DateTime @updatedAt
 
   // relation field
-  manager     users   @relation(fields: [manager_id], references: [user_id])
+  manager     users   @relation(fields: [manager_id], references: [user_id] , onDelete: Cascade , onUpdate: Cascade)
 }
 
 
