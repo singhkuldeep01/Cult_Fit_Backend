@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+// phone no. should be in e.164 format
+model users {
+  user_id   Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String  @db.VarChar(100)
+
+  /// Phone number must follow E.164 format (+[country][number], max 15 digits)
+  phone_no  String?  @unique @db.VarChar(16)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+    // relation field
+  roles     users_roles[]
+  manager   gym_center[]
+   credentials  credentials[]
+}
+
+model roles {
+  role_id   Int      @id @default(autoincrement())
+  role_name String   @unique @db.VarChar(100)
+  description String? @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users       users_roles[]
+}
+
+model users_roles {
+  user_id   Int  
+  role_id   Int
+
+  // Relations
+  user      users @relation(fields: [user_id], references: [user_id])
+  role      roles @relation(fields: [role_id], references: [role_id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+ // composite primary key instead of @@unique
+  @@id([user_id, role_id])
+}
+
+
+model gym_center{
+  center_id   Int      @id @default(autoincrement())
+  center_name String   @db.VarChar(100)
+  location    String   @db.VarChar(255) 
+  contact_no  String   @db.VarChar(16)
+  manager_id  Int
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // relation field
+  manager     users   @relation(fields: [manager_id], references: [user_id])
+}
+
+
+model credentials {
+  credential_id Int      @id @default(autoincrement())
+  user_id       Int
+  provider      String   @default("local") // local | google | facebook | etc
+  hashedPassword String? // null if OAuth login
+
+  last_login   DateTime? 
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // relation
+  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, provider]) // a user can have one credential per provider
+}
