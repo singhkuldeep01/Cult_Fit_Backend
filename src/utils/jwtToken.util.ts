@@ -9,7 +9,7 @@ export interface JwtPayload extends JwtLibPayload {
   user_id: number;
   email: string;
   name: string;
-  role: string;
+  roles: Number[];
 }
 
 export class TokenUtil {

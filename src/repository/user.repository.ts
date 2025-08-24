@@ -1,4 +1,4 @@
-import { CreateUserDTO } from "../dto/user.dto";
+import { CreateUserDTO, UserWithCredentialsAndRolesDTO } from "../dto/user.dto";
 import { prisma } from "../prisma/client";
 import { Prisma, users } from "@prisma/client";
 
@@ -48,4 +48,15 @@ export class UserRepository {
       where: { phone_no },
     });
   }
+    async getUserWithPasswordAndRole(email: string): Promise<UserWithCredentialsAndRolesDTO | null> {
+    return prisma.users.findUnique({
+        where: { email },
+        include: {
+        credentials: true,
+        roles: {
+            include: { role: true }, // includes role_id, role_name
+        },
+        },
+    });
+    }
 }

@@ -3,8 +3,9 @@ import { UserRepository } from "../repository/user.repository";
 import { RegisterUserInput } from "../validations/registerUser.validation";
 import { PasswordUtil } from "../utils/password.util";
 import { prisma } from "../prisma/client";
-import { ConflictError } from "../utils/errors/app.error";
-
+import { ConflictError, NotFoundError, UnauthorizedError } from "../utils/errors/app.error";
+import { LoginUserInput } from "../validations/registerUser.validation";
+import { TokenUtil } from "../utils/jwtToken.util";
 const userRepository = new UserRepository();
 
 
@@ -27,8 +28,8 @@ export const registerUserService = async (data: RegisterUserInput) => {
 
   // 🔹 Step 3: Assign default roles
   const roleIds: number[] = [1]; // default role: Member
-  if (data.role_id === 2) {
-    roleIds.push(2); // Host/Gym Owner
+  if (data.role_id === 2 || data.role_id === 3) {
+    roleIds.push(data.role_id); // Host/Gym Owner
   }
 
   // 🔹 Step 4: Create user + roles inside a transaction
@@ -51,4 +52,34 @@ export const registerUserService = async (data: RegisterUserInput) => {
     name: user.name,
     phone_no: user.phone_no
   };
+};
+
+export const loginUserService = async (data:LoginUserInput) =>{
+    const user = await userRepository.getUserWithPasswordAndRole(data.email);
+    if (!user) {
+        throw new NotFoundError("User not found");
+    }
+    const hashPassword = user.credentials[0].hashedPassword;
+
+    if(hashPassword && !PasswordUtil.comparePassword(data.password, hashPassword)){
+        throw new UnauthorizedError("Invalid password");
+    }
+
+    const payload = {
+        user_id: user.user_id,
+        email: user.email,
+        name: user.name,
+        roles: user.roles.map(r => Number(r.role.role_name)) // array of role names
+    };
+
+    const token = TokenUtil.generateToken(payload);
+    return { 
+        token,
+        user: {
+            user_id: user.user_id,
+            email: user.email,
+            name: user.name,
+            roles: user.roles.map(r => r.role.role_name)
+        }
+     };
 };
