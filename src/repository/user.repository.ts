@@ -1,9 +1,9 @@
 import { CreateUserDTO, UserWithCredentialsAndRolesDTO } from "../dto/user.dto";
 import { prisma } from "../prisma/client";
-import { Prisma, users } from "@prisma/client";
+import { Prisma, users , roles } from "@prisma/client";
 
 export class UserRepository {
-  async createUser(data: CreateUserDTO) : Promise<users> {
+  async createUser(data: CreateUserDTO): Promise<users> {
     return await prisma.$transaction(async (tx) => {
       // Step 1: Create base user
       const user = await tx.users.create({
@@ -43,20 +43,45 @@ export class UserRepository {
     });
   }
 
-  async getUserByPhone(phone_no: string ): Promise<users | null> {
+  async getUserByPhone(phone_no: string): Promise<users | null> {
     return prisma.users.findUnique({
       where: { phone_no },
     });
   }
-    async getUserWithPasswordAndRole(email: string): Promise<UserWithCredentialsAndRolesDTO | null> {
+  async getUserRoleWithId(user_id: number) {
     return prisma.users.findUnique({
-        where: { email },
-        include: {
+      where: { user_id },
+      select: {
+        user_id: true,
+        roles: {
+          select: {
+            role_id: true,
+            role: {
+              select: {
+                role_name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getUserWithPasswordAndRole(
+    email: string
+  ): Promise<UserWithCredentialsAndRolesDTO | null> {
+    return prisma.users.findUnique({
+      where: { email },
+      include: {
         credentials: true,
         roles: {
-            include: { role: true }, // includes role_id, role_name
+          include: { role: true }, // includes role_id, role_name
         },
-        },
+      },
     });
-    }
+  }
+
+  async getAllRoles(): Promise<roles[]> {
+    return prisma.roles.findMany();
+  }
 }

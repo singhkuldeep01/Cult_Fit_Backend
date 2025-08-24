@@ -11,7 +11,7 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 
 app.use(attachUniqueID);
-app.use('/api' , apiRoutes)
+app.use('/api' , apiRoutes);
 app.use(pingRouter); // Use the ping router
 
 app.get('/', (req: Request, res: Response) => {
