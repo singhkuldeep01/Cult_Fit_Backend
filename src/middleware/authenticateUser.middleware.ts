@@ -14,8 +14,14 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     }
     try{
         const decoded = TokenUtil.verifyToken(token);
-        req.body = {
-            ...req.body,
+        // req.body = {
+        //     ...req.body,
+        //     user_id: decoded.user_id,
+        //     email: decoded.email,
+        //     name: decoded.name,
+        //     roles: decoded.roles
+        // };
+        req.user = {
             user_id: decoded.user_id,
             email: decoded.email,
             name: decoded.name,

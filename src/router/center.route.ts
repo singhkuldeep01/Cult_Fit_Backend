@@ -3,11 +3,12 @@ import { createGymCenterController, deleteGymCenterController, getGymCentersCont
 import { authenticateUser } from "../middleware/authenticateUser.middleware";
 import validateZodSchema from "../middleware/validateZodSchema.middleware";
 import { createGymCenterSchema } from "../validations/center.validation";
+import { authorizeHost } from "../middleware/authorizeHost.middleware";
 const router = Router();
 
 
-router.get('/', authenticateUser, getGymCentersController);
-router.post('/', validateZodSchema(createGymCenterSchema), authenticateUser, createGymCenterController);
-router.delete('/:id', authenticateUser, deleteGymCenterController);
+    router.get('/', authenticateUser, getGymCentersController);
+    router.post('/', authenticateUser, authorizeHost, validateZodSchema(createGymCenterSchema),  createGymCenterController);
+    router.delete('/:id', authenticateUser, authorizeHost, deleteGymCenterController);
 
 export default router;

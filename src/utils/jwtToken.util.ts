@@ -21,7 +21,7 @@ export class TokenUtil {
   static generateToken(payload: JwtPayload): string {
     try {
         // Sign the payload with JWT_SECRET and set expiration time
-        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }); // or '1h', etc.
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' }); // or '7d', etc.
         return token;
         } catch (error) {
             throw new Error('Failed to generate token');

@@ -7,7 +7,7 @@ import { CreateGymCenterInputDto } from "../dto/center.dto";
 
 export const getGymCentersController = async (req: Request, res: Response , next : NextFunction) => {
   try {
-    const result = await getGymCentersService(Number(req.body.user_id));
+    const result = await getGymCentersService(Number(req.user.user_id));
     res.status(200).json({
         success: true,
         data: result,
@@ -18,14 +18,14 @@ export const getGymCentersController = async (req: Request, res: Response , next
 };
 
 export const createGymCenterController = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(req.user);
 try {
     const body = {
         center_name: req.body.center_name,
         location: req.body.location,
         contact_no: req.body.contact_no,
-        manager_id: req.body.user_id,
+        manager_id: req.user.user_id,
     };
-    console.log(body);
     const result = await createGymCenterService(body);
 
     res.status(201).json(result);
@@ -36,7 +36,8 @@ try {
 
 export const deleteGymCenterController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await deleteGymCenterService(Number(req.params.id) , Number(req.body.user_id));
+    const center_id = Number(req.params.id);
+    const result = await deleteGymCenterService(center_id, Number(req.user.user_id));
     res.status(200).json({
       success: true,
       data: result,
