@@ -15,8 +15,7 @@ export const authorizeHost = async(req: Request, res: Response, next: NextFuncti
     }
     if(center_id) {
         const getGymCenter = await gymCenterRepository.getGymCentersById(center_id);
-
-        if (getGymCenter && getGymCenter.manager_id !== user_id) {
+        if (!getGymCenter || getGymCenter.manager_id !== user_id) {
             throw new ForbiddenError("You are not authorized to access this gym center");
         }
     }

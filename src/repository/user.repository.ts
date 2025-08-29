@@ -18,7 +18,7 @@ export class UserRepository {
       await tx.credentials.create({
         data: {
           user_id: user.user_id,
-          provider: "local",
+          provider: "LOCAL",
           hashedPassword: data.passwordHash,
         },
       });

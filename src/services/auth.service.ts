@@ -69,7 +69,7 @@ export const loginUserService = async (data:LoginUserInput) =>{
         user_id: user.user_id,
         email: user.email,
         name: user.name,
-        roles: user.roles.map(r => Number(r.role.role_name)) // array of role names
+        roles: user.roles.map(r => Number(r.role.role_id)) // array of role IDs
     };
 
     const token = TokenUtil.generateToken(payload);

@@ -1,5 +1,5 @@
 import { Request , Response , NextFunction } from "express";
-import { createGymCenterService, deleteGymCenterService, getGymCentersService } from "../services/gymCenters.service";
+import { createGymCenterService, deleteGymCenterService, getGymCentersService, updateGymCenterService } from "../services/gymCenters.service";
 import { gymCenterRepository } from "../repository/gymCenter.repository";
 import { error } from "console";
 import { CreateGymCenterInputDto } from "../dto/center.dto";
@@ -38,6 +38,19 @@ export const deleteGymCenterController = async (req: Request, res: Response, nex
   try {
     const center_id = Number(req.params.id);
     const result = await deleteGymCenterService(center_id, Number(req.user.user_id));
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateGymCenterController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const center_id = Number(req.params.id);
+    const result = await updateGymCenterService(center_id, req.body);
     res.status(200).json({
       success: true,
       data: result,

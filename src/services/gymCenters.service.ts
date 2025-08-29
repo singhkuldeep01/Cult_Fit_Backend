@@ -44,3 +44,15 @@ export const deleteGymCenterService = async (id: number , user_id : number) => {
 };
 
 
+export const updateGymCenterService = async (id: number, data: Partial<CreateGymCenterInputDto>) => {
+    const getGymCenter = await gymCenterRepository.getGymCentersById(id);
+    if (!getGymCenter) {
+        throw new NotFoundError("Gym center not found");
+    }
+
+    const updatedGymCenter = await gymCenterRepository.updateGymCenter(id, data);
+    return {
+        success: true,
+        data: updatedGymCenter,
+    };
+};
