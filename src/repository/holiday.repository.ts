@@ -1,8 +1,9 @@
-import { center_holiday } from "@prisma/client";
+import { center_holiday , Prisma } from "@prisma/client";
 import { prisma } from "../prisma/client";
+import { createHolidayDto } from "../dto/holiday.dto";
 
 export class HolidayRepository {
-    async createHoliday(data: { name: string; center_id: number; startDate: Date; endDate: Date; }): Promise<center_holiday> {
+    async createHoliday(data: createHolidayDto): Promise<center_holiday> {
         return prisma.center_holiday.create({
             data
         });
@@ -14,14 +15,14 @@ export class HolidayRepository {
         });
     }
 
-    async isHoliday(center_id: number, date: Date): Promise<boolean> {
+    async isHoliday(center_id: number, date: Date) {
         const holiday = await prisma.center_holiday.findFirst({
             where: {
                 center_id,
-                startDate: { lte: date },
-                endDate: { gte: date }
+                holidayDate: date
             }
         });
-        return holiday !== null;
+        return holiday;
     }
+
 }

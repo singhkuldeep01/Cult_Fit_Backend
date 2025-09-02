@@ -108,12 +108,11 @@ CREATE TABLE `center_holiday` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `center_id` INTEGER NOT NULL,
-    `startDate` DATETIME(3) NOT NULL,
-    `endDate` DATETIME(3) NOT NULL,
+    `holidayDate` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `center_holiday_center_id_startDate_endDate_key`(`center_id`, `startDate`, `endDate`),
+    UNIQUE INDEX `center_holiday_center_id_holidayDate_key`(`center_id`, `holidayDate`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -148,4 +147,4 @@ ALTER TABLE `ClassSession` ADD CONSTRAINT `fk_class_session_recurrence` FOREIGN 
 ALTER TABLE `ClassSession` ADD CONSTRAINT `fk_class_session_center` FOREIGN KEY (`center_id`) REFERENCES `gym_center`(`center_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `center_holiday` ADD CONSTRAINT `fk_center_holiday_center` FOREIGN KEY (`center_id`) REFERENCES `gym_center`(`center_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `center_holiday` ADD CONSTRAINT `center_holiday_center_id_fkey` FOREIGN KEY (`center_id`) REFERENCES `gym_center`(`center_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

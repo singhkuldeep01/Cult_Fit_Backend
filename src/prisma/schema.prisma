@@ -148,14 +148,13 @@ model center_holiday {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(100)
   center_id Int
-  startDate DateTime
-  endDate   DateTime
+  holidayDate DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  center gym_center @relation(fields: [center_id], references: [center_id], map: "fk_center_holiday_center")
+  center gym_center @relation(fields: [center_id], references: [center_id])
 
-  @@unique([center_id, startDate, endDate])
+  @@unique([center_id, holidayDate])
 }
 
 enum SessionStatus {

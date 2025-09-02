@@ -57,12 +57,16 @@ export class ClassValidation {
   }
 
   // 7. Holiday check (range-based)
-  const isHoliday = await holidayRepo.isHoliday(center_id, start);
+
+  const normalized = new Date(start);
+  normalized.setUTCHours(0, 0, 0, 0);
+  const isHoliday = await holidayRepo.isHoliday(center_id, normalized);
+
+
   if (isHoliday) {
     throw new Error("Class session falls on a holiday");
   }
 
-  return true; // ✅ All checks passed
 }
 
     async isHoldingClassSession(center_id: number, startDateTime: Date, endDateTime: Date) {

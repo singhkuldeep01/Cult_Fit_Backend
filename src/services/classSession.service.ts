@@ -13,11 +13,12 @@ export const createClassSessionService = async (data: CreateClassSessionDTO) => 
     const startDateTime = data.startDateTime;
     const endDateTime = data.endDateTime;
 
+
     const template = await classTemplateRepository.getClassTemplateById(template_id , center_id);
     if(!template) {
       throw new NotFoundError("Class template not found");
     }
     await classValidation.isValidClassSession(center_id, startDateTime, endDateTime);
-    const classSession = classSessionRepository.createClassSession(data);
+    const classSession = await classSessionRepository.createClassSession(data);
     return classSession;
 };
