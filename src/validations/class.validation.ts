@@ -5,9 +5,12 @@ export const createClassTemplateSchema = z.object({
   name: z.string().min(2).max(100),
   description: z.string().min(10).max(500).optional(),
   capacity: z.number().min(1).max(50),
+  center_id: z.number().min(1)
 });
 
-
+export const centerIdSchema = z.object({
+  center_id: z.number().min(1)
+});
 
 export const createClassSessionSchema = z.object({
   startDateTime: z.coerce.date().refine(

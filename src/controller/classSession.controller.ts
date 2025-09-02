@@ -10,8 +10,10 @@ export const createClassSessionController = async(req: Request , res: Response, 
       template_id: req.body.template_id,
       center_id: req.body.center_id,
     }
-    // const classSession = await createClassSessionService(body);
-    res.status(201).json("temp");
+    const classSession = await createClassSessionService(body);
+
+    // console.log(body);
+    res.status(201).json(classSession);
   } catch (error) {
     next(error);
   }
