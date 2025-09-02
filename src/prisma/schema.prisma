@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,31 +6,33 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 // phone no. should be in e.164 format
 model users {
-  user_id   Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String  @db.VarChar(100)
+  user_id     Int            @id @default(autoincrement())
+  email       String         @unique
+  name        String         @db.VarChar(100)
 
   /// Phone number must follow E.164 format (+[country][number], max 15 digits)
-  phone_no  String?  @unique @db.VarChar(16)
+  phone_no    String?        @unique @db.VarChar(16)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
-    // relation field
-  roles     users_roles[]
-  manager   gym_center[]
-  credentials  credentials[]
+  // relation field
+  roles       users_roles[]
+  manager     gym_center[]
+  credentials credentials[]
 }
 
 model roles {
-  role_id   Int      @id @default(autoincrement())
-  role_name String   @unique @db.VarChar(100)
-  description String? @db.VarChar(255)
+  role_id     Int          @id @default(autoincrement())
+  role_name   String       @unique @db.VarChar(100)
+  description String?      @db.VarChar(255)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
   users       users_roles[]
 }
 
@@ -45,18 +41,16 @@ model users_roles {
   role_id   Int
 
   // Relations
-  user      users @relation(fields: [user_id], references: [user_id] , onDelete: Cascade , onUpdate: Cascade)
-  role      roles @relation(fields: [role_id], references: [role_id] , onDelete: Cascade , onUpdate: Cascade)
+  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_users_roles_user")
+  role roles @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_users_roles_role")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
- // composite primary key instead of @@unique
   @@id([user_id, role_id])
 }
 
-
-model gym_center{
+model gym_center {
   center_id   Int      @id @default(autoincrement())
   center_name String   @db.VarChar(100)
   location    String   @db.VarChar(255) 
@@ -67,28 +61,27 @@ model gym_center{
   updatedAt   DateTime @updatedAt
 
   // relation field
-  manager     users   @relation(fields: [manager_id], references: [user_id] , onDelete: Cascade , onUpdate: Cascade)
+  manager          users            @relation(fields: [manager_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_gym_center_manager")
   classes_templates ClassTemplate[]
-  class_sessions ClassSession[]
-  recurrence_rules RecurrenceRule[]
-  holidays center_holiday[]
+  class_sessions    ClassSession[]
+  recurrence_rules  recurring_class[]
+  holidays          center_holiday[]
 }
 
-
 model credentials {
-  credential_id Int      @id @default(autoincrement())
-  user_id       Int
-  provider      AuthProvider   @default(LOCAL) // local | google | facebook | etc
-  hashedPassword String? // null if OAuth login
+  credential_id  Int          @id @default(autoincrement())
+  user_id        Int
+  provider       AuthProvider @default(LOCAL)
+  hashedPassword String?
 
-  last_login   DateTime? 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  last_login     DateTime? 
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   // relation
-  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_credentials_user")
 
-  @@unique([user_id, provider]) // a user can have one credential per provider
+  @@unique([user_id, provider])
 }
 
 enum WeekDay {
@@ -102,72 +95,68 @@ enum WeekDay {
 }
 
 model ClassTemplate {
-  id            Int              @id @default(autoincrement())
-  name          String
-  description   String?
-  centerId      Int
-  capacity      Int
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String?
+  center_id   Int
+  capacity    Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   // relations
-  center        gym_center       @relation(fields: [centerId], references: [center_id], onDelete: Cascade, onUpdate: Cascade)
-  recurrence    RecurrenceRule[]
-  sessions      ClassSession[]
+  center     gym_center      @relation(fields: [center_id], references: [center_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_class_template_center")
+  recurrence recurring_class[]
+  sessions   ClassSession[]
 }
 
-model RecurrenceRule {
-  id             Int           @id @default(autoincrement())
-  templateId     Int
-  centerId       Int           // redundancy for direct lookup
-  daysOfWeek     Json           // e.g. [1,3,5] = Mon/Wed/Fri
+model recurring_class {
+  id              Int           @id @default(autoincrement())
+  template_id     Int
+  center_id       Int
+  daysOfWeek      Json
   recurrenceStart DateTime
   recurrenceEnd   DateTime
-  startTime      DateTime
-  endTime        DateTime
+  startTime       DateTime
+  endTime         DateTime
 
   // relations
-  template       ClassTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  center         gym_center    @relation(fields: [centerId], references: [center_id], onDelete: Cascade, onUpdate: Cascade)
-  sessions       ClassSession[]
+  template ClassTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_recurring_class_template")
+  center   gym_center    @relation(fields: [center_id], references: [center_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_recurring_class_center")
+  sessions ClassSession[]
 
-   @@unique([templateId, startTime])
+  @@unique([template_id, center_id, startTime])
 }
 
 model ClassSession {
-  id          Int           @id @default(autoincrement())
-  templateId  Int
-  recurrenceId   Int?       
-  centerId    Int
-  sessionDate DateTime      
-  startTime   DateTime
-  endTime     DateTime
-  status      SessionStatus @default(SCHEDULED)
-
+  id            Int           @id @default(autoincrement())
+  template_id   Int
+  recurrence_id Int?       
+  center_id     Int   
+  startDateTime DateTime
+  endDateTime   DateTime
+  status        SessionStatus @default(SCHEDULED)
+  
   // relations
-  template    ClassTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  recurrence  RecurrenceRule? @relation(fields: [recurrenceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  center      gym_center    @relation(fields: [centerId], references: [center_id], onDelete: Cascade, onUpdate: Cascade)
-    // Prevent accidental duplicates on the same template/time
-  @@unique([templateId, startTime])
+  template   ClassTemplate  @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_class_session_template")
+  recurrence recurring_class? @relation(fields: [recurrence_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_class_session_recurrence")
+  center     gym_center     @relation(fields: [center_id], references: [center_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_class_session_center")
+
+  @@unique([template_id, startDateTime])
 }
-
-
-
 
 model center_holiday {
-  id         Int     @id @default(autoincrement())
-  center_id  Int
-  startDate  DateTime
-  endDate    DateTime
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  center_id Int
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  center        gym_center  @relation(fields: [center_id], references: [center_id])
+  center gym_center @relation(fields: [center_id], references: [center_id], map: "fk_center_holiday_center")
 
-  @@unique([center_id, startDate, endDate]) // uncomment if you want to avoid duplicates
+  @@unique([center_id, startDate, endDate])
 }
-
 
 enum SessionStatus {
   SCHEDULED

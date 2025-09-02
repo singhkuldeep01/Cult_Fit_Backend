@@ -18,7 +18,6 @@ export const getGymCentersController = async (req: Request, res: Response , next
 };
 
 export const createGymCenterController = async (req: Request, res: Response, next: NextFunction) => {
-  console.log(req.user);
 try {
     const body = {
         center_name: req.body.center_name,

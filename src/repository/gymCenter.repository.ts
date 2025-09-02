@@ -1,13 +1,9 @@
 import { prisma } from "../prisma/client";
 import { Prisma, gym_center } from "@prisma/client";
+import { CreateGymCenterInputDto } from "../dto/center.dto";
 
 class GymCenterRepository {
-  async createGymCenter(data: {
-    center_name: string;
-    location: string;
-    contact_no: string;
-    manager_id: number;
-  }): Promise<gym_center> {
+  async createGymCenter(data: CreateGymCenterInputDto): Promise<gym_center> {
     return prisma.gym_center.create({
       data: {
         center_name: data.center_name,
@@ -19,6 +15,7 @@ class GymCenterRepository {
       },
     });
   }
+
 
   async getGymCentersByManagerId(id: number): Promise<gym_center[] | null> {
     return await prisma.gym_center.findMany({
